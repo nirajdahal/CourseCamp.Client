@@ -1,25 +1,22 @@
 import logo from './logo.svg';
+import Navbar from './components/layouts/nabvar/Navbar'
 import './App.css';
-
+import BootcampForm from './components/bootcamp/BootcampForm';
+import { useSelector } from 'react-redux';
+import { selectIsLoading } from '../src/redux/slice/loadingSlice'
+import GlobalErrorHandler from './components/error/GlobalErrorHandler';
+import Loader from './components/loader/Loader'
 function App() {
+  const isLoading = useSelector(selectIsLoading)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      {isLoading && <Loader />}
+      <div data-theme="dark" >
+        {/* <GlobalErrorHandler /> */}
+        <Navbar />
+        <BootcampForm />
+      </div>
+    </>
   );
 }
-
 export default App;
