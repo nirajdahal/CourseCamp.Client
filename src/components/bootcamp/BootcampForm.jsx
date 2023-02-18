@@ -65,17 +65,9 @@ const BootcampForm = () => {
             validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
                 // Handle form submission
-                dispatch(SET_SHOW_LOADING())
-                try {
-                    const bootcamp = await createBootcamp({ ...values, photo: 'abc.png' })
-                    console.log(bootcamp);
-                }
-                catch (error) {
-                    alert(error)
-                    console.log("error caught", error)
-                }
+                const bootcamp = await createBootcamp({ ...values, photo: 'abc.png' })
+                console.log("hrllo", bootcamp);
                 setSubmitting(false);
-                dispatch(SET_REMOVE_LOADING())
             }}
         >
             {({ isSubmitting, isValid, touched, errors, field }) => (
