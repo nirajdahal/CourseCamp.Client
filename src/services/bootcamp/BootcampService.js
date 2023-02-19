@@ -47,3 +47,40 @@ export const createBootcamp = async (newBootcamp) => {
     const data = await bootcamp.post('/v1/bootcamps', newBootcamp)
     return data
 }
+export const getAllBootcampByFiltering = async (bootcampQuery) => {
+    const { name, price, page, limit, distance, zipcode, housing, jobGuarantee } = bootcampQuery
+    const query = {}
+    if (name) {
+        query.sort = 'name'
+    }
+    if (housing) {
+        query.housing = true
+    }
+    if (jobGuarantee) {
+        query.jobGuarantee = true
+    }
+    if (distance) {
+        query.distance = distance
+    }
+    if (zipcode) {
+        query.zipcode = zipcode
+    }
+    if (page) {
+        query.page = page
+    }
+    if (limit) {
+        query.limit = limit
+    }
+    if (price) {
+        const data = await bootcamp.get('/v1/bootcamps', {
+            params: { ...query, 'averageCost[lte]': price },
+        })
+        console.log(data)
+    }
+    else {
+        const data = await bootcamp.get('/v1/bootcamps', {
+            params: query,
+        })
+        console.log(data)
+    }
+}

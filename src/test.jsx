@@ -1,6 +1,10 @@
-import { Formik, Field, Form, ErrorMessage } from 'formik';
+import React from 'react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-const BootcampSchema = Yup.object().shape({
+import { createBootcamp } from '../../services/bootcamp/BootcampService';
+import { useDispatch } from 'react-redux';
+import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../redux/slice/loadingSlice';
+const validationSchema = Yup.object().shape({
     name: Yup.string()
         .required('Please enter a name')
         .max(50, 'Name can not be more than 50 characters'),
@@ -13,10 +17,11 @@ const BootcampSchema = Yup.object().shape({
             'Please use a valid URL with HTTP or HTTPS'
         ),
     phone: Yup.string().max(20, 'Phone number can not be longer than 20 characters'),
-    email: Yup.string().email('Please enter a valid email'),
+    email: Yup.string().required('Please enter an email').email('Please enter a valid email'),
     address: Yup.string().required('Please enter an address'),
     careers: Yup.array()
         .required('Please select at least one career')
+        .min(1, 'Please select at least one career')
         .of(
             Yup.string().oneOf([
                 'Web Development',
@@ -32,86 +37,60 @@ const BootcampSchema = Yup.object().shape({
     jobGuarantee: Yup.boolean(),
     acceptGi: Yup.boolean(),
     photo: Yup.mixed()
-        .test('fileSize', 'File too large', (value) => value && value.size <= 2000000)
+        .required('Photo is required')
+        .test('fileSize', 'File too large', (value) => !value || value.size <= 2000000)
         .test('fileType', 'Unsupported File Format', (value) =>
-            value ? ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(value.type) : true
-        ),
+            !value || ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(value.type)
+        )
 })
-export default function BootcampForm() {
+const initialValues = {
+    name: '',
+    description: '',
+    website: '',
+    phone: '',
+    email: '',
+    address: '',
+    careers: [],
+    housing: false,
+    jobAssistance: false,
+    jobGuarantee: false,
+    acceptGi: false,
+    photo: null,
+}
+const BootcampForm = () => {
+    const dispatch = useDispatch()
     return (
         <Formik
-            initialValues={{
-                name: '',
-                description: '',
-                website: '',
-                phone: '',
-                email: '',
-                address: '',
-                careers: [],
-                housing: false,
-                jobAssistance: false,
-                jobGuarantee: false,
-                acceptGi: false,
-                photo: null,
-            }}
-            validationSchema={BootcampSchema}
-            onSubmit={(values, { setSubmitting }) => {
-                setTimeout(() => {
-                    alert(JSON.stringify(values, null, 2));
-                    setSubmitting(false);
-                }, 400);
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+                // Handle form submission
+                const bootcamp = await createBootcamp({ ...values, photo: 'abc.png' })
+                console.log("hrllo", bootcamp);
+                setSubmitting(false);
             }}
         >
-            {({ isSubmitting, errors, touched }) => (
-                <Form>
-                    <div>
-                        <label htmlFor="name">Name</label>
-                        <Field type="text" name="name" />
-                        <ErrorMessage name="name" component="div" className="error" />
-                        {touched.name && errors.name && <div className="error">{errors.name}</div>}
+            {({ isSubmitting, isValid, touched, errors, field }) => (
+                <Form >
+                    <div className=' p-5 flex flex-row flex-wrap gap-11 justify-center'>
+                        <div>
+                            <div className="form-control w-full max-w-xs">
+                                <label className="label">
+                                    <span className="label-text text-success">Address</span>
+                                    <span>
+                                        {touched.address && errors.address && (
+                                            <div><span className="text-secondary label-text-alt">{errors.address}</span></div>
+                                        )}
+                                    </span>
+                                </label>
+                                <Field name="address" type="text" placeholder="Type here" className="input input-bordered input-sm w-full max-w-xs" />
+                            </div>
+                        </div>
+                        <button className='mt-2 btn btn-secondary text-center ' type="submit" disabled={isSubmitting || !isValid}>Submit</button>
                     </div>
-                    <div>
-                        <label htmlFor="description">Description</label>
-                        <Field component="textarea" name="description" />
-                        <ErrorMessage name="description" component="div" className="error" />
-                        {touched.description && errors.description && <div className="error">{errors.description}</div>}
-                    </div>
-                    <div>
-                        <label htmlFor="website">Website</label>
-                        <Field type="text" name="website" />
-                        <ErrorMessage name="website" component="div" className="error" />
-                    </div>
-                    <div>
-                        <label htmlFor="careers">Careers</label>
-                        <Field name="careers" type="checkbox" value="Web Development" />
-                        <label htmlFor="careers">Web Development</label>
-                        <Field name="careers" type="checkbox" value="Mobile Development" />
-                        <label htmlFor="careers">Mobile Development</label>
-                        <Field name="careers" type="checkbox" value="UI/UX" />
-                        <label htmlFor="careers">UI/UX</label>
-                        <ErrorMessage name="careers" />
-                    </div>
-                    <div>
-                        <label htmlFor="housing">Housing</label>
-                        <Field name="housing" type="checkbox" />
-                    </div>
-                    <div>
-                        <label htmlFor="jobAssistance">Job Assistance</label>
-                        <Field name="jobAssistance" type="checkbox" />
-                    </div>
-                    <div>
-                        <label htmlFor="jobGuarantee">Job Guarantee</label>
-                        <Field name="jobGuarantee" type="checkbox" />
-                    </div>
-                    <div>
-                        <label htmlFor="acceptGi">Accepts GI Bill</label>
-                        <Field name="acceptGi" type="checkbox" />
-                    </div>
-                    <button type="submit" className='btn btn-primary' disabled={isSubmitting}>
-                        Submit
-                    </button>
                 </Form>
             )}
         </Formik>
     );
-}
+};
+export default BootcampForm;

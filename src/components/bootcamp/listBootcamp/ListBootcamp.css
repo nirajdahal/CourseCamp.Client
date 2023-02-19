@@ -1,0 +1,34 @@
+.wholepage {
+    display: flex;
+}
+
+.sidebar {
+    width: 40%;
+}
+
+.bootcamp-list {
+    width: 50%;
+}
+
+.card div {
+    align-items: center;
+}
+
+.search-btn {
+    margin-top: 10px;
+}
+
+@media only screen and (max-width: 768px) {
+    .wholepage {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .bootcamp-list {
+        width: 100%;
+    }
+}

@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import './BootcampForm.css'
 import { Formik, Form, Field, ErrorMessage } from 'formik';
+import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import * as Yup from 'yup';
-import { createBootcamp } from '../../services/bootcamp/BootcampService';
+import { createBootcamp } from '../../../services/bootcamp/BootcampService';
 import { useDispatch } from 'react-redux';
-import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../redux/slice/loadingSlice';
+import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../../redux/slice/loadingSlice';
 const validationSchema = Yup.object().shape({
     name: Yup.string()
         .required('Please enter a name')
@@ -59,6 +61,17 @@ const initialValues = {
 }
 const BootcampForm = () => {
     const dispatch = useDispatch()
+    const [address, setAddress] = useState('');
+    const handleChange = (address) => {
+        setAddress(address);
+    };
+    const handleSelect = async (address, setFieldValue) => {
+        const results = await geocodeByAddress(address);
+        const latLng = await getLatLng(results[0]);
+        setAddress(address);
+        setFieldValue('address', address);
+        setFieldValue('location.coordinates', [latLng.lng, latLng.lat]);
+    }
     return (
         <Formik
             initialValues={initialValues}
@@ -70,7 +83,7 @@ const BootcampForm = () => {
                 setSubmitting(false);
             }}
         >
-            {({ isSubmitting, isValid, touched, errors, field }) => (
+            {({ isSubmitting, isValid, touched, errors, field, setFieldValue }) => (
                 <Form >
                     <div className=' p-5 flex flex-row flex-wrap gap-11 justify-center'>
                         <div >
@@ -109,7 +122,25 @@ const BootcampForm = () => {
                                         )}
                                     </span>
                                 </label>
-                                <Field name="address" type="text" placeholder="Type here" className="input input-bordered input-sm w-full max-w-xs" />
+                                <PlacesAutocomplete value={address} onChange={handleChange} onSelect={(address) => handleSelect(address, setFieldValue)}>
+                                    {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
+                                        <div>
+                                            <Field {...getInputProps({ name: 'address', placeholder: 'Type here', className: 'input input-bordered input-sm w-full max-w-xs' })} />
+                                            <div className="autocomplete-dropdown-container">
+                                                {loading && <div>Loading...</div>}
+                                                {suggestions.map((suggestion) => {
+                                                    const className = suggestion.active ? 'suggestion-item--active' : 'suggestion-item';
+                                                    const style = suggestion.active ? { backgroundColor: 'inherit', cursor: 'pointer', position: 'relative', } : { position: 'relative', zIndex: 999, backgroundColor: 'inherit', cursor: 'pointer' };
+                                                    return (
+                                                        <div  {...getSuggestionItemProps(suggestion, { className, style })}>
+                                                            <span >{suggestion.description}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </PlacesAutocomplete>
                             </div>
                         </div>
                         <div>
