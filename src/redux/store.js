@@ -1,9 +1,10 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
 import loadingReducer from './slice/loadingSlice'
+import bootcampReducer from './slice/bootCampSlice'
 const rootReducer = combineReducers({
     // auth: authReducer,
     loading: loadingReducer,
-    // product: productReducer,
+    bootcamp: bootcampReducer,
     // filter: filterReducer
 })
 const store = configureStore({

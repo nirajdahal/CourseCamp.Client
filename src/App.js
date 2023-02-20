@@ -4,7 +4,6 @@ import './App.css';
 import BootcampForm from './components/bootcamp/createBootcamp/BootcampForm';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectIsLoading } from '../src/redux/slice/loadingSlice'
-import GlobalErrorHandler from './components/error/GlobalErrorHandler';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Loader from './components/loader/Loader'
@@ -13,10 +12,10 @@ import { setupHttpInterceptors } from './services/bootcamp/BootcampService';
 import ListBootcamp from './components/bootcamp/listBootcamp/ListBootcamp';
 function App() {
   const isLoading = useSelector(selectIsLoading)
-  const dispatch = useDispatch();
-  useEffect(() => {
-    setupHttpInterceptors(dispatch);
-  }, [dispatch]);
+  // const dispatch = useDispatch();
+  // useEffect(() => {
+  //   setupHttpInterceptors(dispatch);
+  // }, [dispatch]);
   return (
     <>
       {isLoading && <Loader />}

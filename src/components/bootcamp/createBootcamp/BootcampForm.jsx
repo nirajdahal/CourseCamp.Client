@@ -3,7 +3,7 @@ import './BootcampForm.css'
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import PlacesAutocomplete, { geocodeByAddress, getLatLng } from 'react-places-autocomplete';
 import * as Yup from 'yup';
-import { createBootcamp } from '../../../services/bootcamp/BootcampService';
+import { AccessBootcampAPI } from '../../../services/bootcamp/BootcampService';
 import { useDispatch } from 'react-redux';
 import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../../redux/slice/loadingSlice';
 const validationSchema = Yup.object().shape({
@@ -61,6 +61,7 @@ const initialValues = {
 }
 const BootcampForm = () => {
     const dispatch = useDispatch()
+    const accessBootcampApi = new AccessBootcampAPI(dispatch)
     const [address, setAddress] = useState('');
     const handleChange = (address) => {
         setAddress(address);
@@ -78,7 +79,7 @@ const BootcampForm = () => {
             validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
                 // Handle form submission
-                const bootcamp = await createBootcamp({ ...values, photo: 'abc.png' })
+                const bootcamp = await accessBootcampApi.createBootcamp({ ...values, photo: 'abc.png' })
                 console.log("hrllo", bootcamp);
                 setSubmitting(false);
             }}

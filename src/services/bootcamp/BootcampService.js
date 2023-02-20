@@ -1,35 +1,39 @@
 import axios from 'axios'
-import { toast } from 'react-toastify';
-import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../redux/slice/loadingSlice';
-import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify'
+import { SET_SHOW_LOADING, SET_REMOVE_LOADING } from '../../redux/slice/loadingSlice'
 const API_URL = process.env.REACT_APP_API_URL
 const bootcamp = axios.create({
     baseURL: API_URL,
     // headers: { Authorization: `token ${GITHUB_TOKEN}` },
 })
 export const setupHttpInterceptors = (dispatch) => {
-    bootcamp.interceptors.request.use((config) => {
-        dispatch(SET_SHOW_LOADING())
-        return config;
-    });
-    bootcamp.interceptors.response.use(
-        (response) => {
-            dispatch(SET_REMOVE_LOADING())
-            return response;
-        },
-        (error) => {
-            dispatch(SET_REMOVE_LOADING())
-            if (error.response && error.response.status >= 400) {
-                const message =
-                    error.response.data.error ||
-                    error.response.data.message ||
-                    'An error occurred';
-                toast(`${error.response.status}: ${message}`);
+    try {
+        bootcamp.interceptors.request.use((config) => {
+            dispatch(SET_SHOW_LOADING())
+            return config
+        })
+        bootcamp.interceptors.response.use(
+            (response) => {
+                dispatch(SET_REMOVE_LOADING())
+                return response
+            },
+            (error) => {
+                dispatch(SET_REMOVE_LOADING())
+                if (error.response && error.response.status >= 400) {
+                    const message =
+                        error.response.data.error ||
+                        error.response.data.message ||
+                        'An error occurred'
+                    toast(`${error.response.status}: ${message}`)
+                }
+                throw error
             }
-            throw error;
-        }
-    );
-};
+        )
+    }
+    catch (error) {
+        toast(`${error.message}`)
+    }
+}
 // Get search results
 // export const searchUsers = async (text) => {
 //     const params = new URLSearchParams({
@@ -39,48 +43,56 @@ export const setupHttpInterceptors = (dispatch) => {
 //     return response.data.items
 // }
 // Get user and repos
-export const getAllBootcamp = async () => {
-    const data = await bootcamp.get('/v1/bootcamps')
-    console.log(data)
-}
-export const createBootcamp = async (newBootcamp) => {
-    const data = await bootcamp.post('/v1/bootcamps', newBootcamp)
-    return data
-}
-export const getAllBootcampByFiltering = async (bootcampQuery) => {
-    const { name, price, page, limit, distance, zipcode, housing, jobGuarantee } = bootcampQuery
-    const query = {}
-    if (name) {
-        query.sort = 'name'
+export class AccessBootcampAPI {
+    constructor(dispatch) {
+        setupHttpInterceptors(dispatch)
     }
-    if (housing) {
-        query.housing = true
-    }
-    if (jobGuarantee) {
-        query.jobGuarantee = true
-    }
-    if (distance) {
-        query.distance = distance
-    }
-    if (zipcode) {
-        query.zipcode = zipcode
-    }
-    if (page) {
-        query.page = page
-    }
-    if (limit) {
-        query.limit = limit
-    }
-    if (price) {
-        const data = await bootcamp.get('/v1/bootcamps', {
-            params: { ...query, 'averageCost[lte]': price },
-        })
+    getAllBootcamp = async (dispatch) => {
+        setupHttpInterceptors(dispatch)
+        const data = await bootcamp.get('/v1/bootcamps')
         console.log(data)
     }
-    else {
-        const data = await bootcamp.get('/v1/bootcamps', {
-            params: query,
-        })
-        console.log(data)
+    createBootcamp = async (newBootcamp, dispatch) => {
+        setupHttpInterceptors(dispatch)
+        const data = await bootcamp.post('/v1/bootcamps', newBootcamp)
+        return data
+    }
+    getAllBootcampByFiltering = async (bootcampQuery, dispatch) => {
+        setupHttpInterceptors(dispatch)
+        const { name, price, page, limit, distance, zipcode, housing, jobGuarantee } = bootcampQuery
+        const query = {}
+        if (name) {
+            query.sort = 'name'
+        }
+        if (housing) {
+            query.housing = true
+        }
+        if (jobGuarantee) {
+            query.jobGuarantee = true
+        }
+        if (distance) {
+            query.distance = distance
+        }
+        if (zipcode) {
+            query.zipcode = zipcode
+        }
+        if (page) {
+            query.page = page
+        }
+        if (limit) {
+            query.limit = limit
+        }
+        if (price) {
+            const data = await bootcamp.get('/v1/bootcamps', {
+                params: { ...query, 'averageCost[lte]': price },
+            })
+            return data
+        }
+        else {
+            const data = await bootcamp.get('/v1/bootcamps', {
+                params: query,
+            })
+            return data
+        }
     }
 }

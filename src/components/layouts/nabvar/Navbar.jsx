@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react'
-import { getAllBootcamp } from '../../../services/bootcamp/BootcampService'
+import { useDispatch } from 'react-redux'
+import { AccessBootcampAPI } from '../../../services/bootcamp/BootcampService'
 const Navbar = () => {
+    const dispatch = useDispatch()
+    const accessBootcampApi = new AccessBootcampAPI(dispatch)
     useEffect(() => {
-        getAllBootcamp()
     }, [])
     return (
         <div className="navbar bg-base-100">

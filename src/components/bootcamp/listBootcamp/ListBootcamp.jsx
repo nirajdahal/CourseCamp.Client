@@ -1,13 +1,29 @@
-import React, { useState } from 'react'
-import { getAllBootcampByFiltering } from '../../../services/bootcamp/BootcampService';
+import { useDispatch } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { SET_BOOTCAMP_DATA } from '../../../redux/slice/bootCampSlice'
+import { AccessBootcampAPI } from '../../../services/bootcamp/BootcampService'
 import './ListBootcamp.css'
 const ListBootcamp = () => {
-    const [selectIsNameChecked, setSelectIsNameChecked] = useState(false);
+    const [bootcampList, setBootcampList] = useState([])
+    const [selectIsNameChecked, setSelectIsNameChecked] = useState(false)
     const [selectedMiles, setSelectedMiles] = useState(0)
     const [selectedZipcode, setselectedZipcode] = useState(0)
     const [selectedPriceRange, setselectedPriceRange] = useState(0)
     const [selectHousing, setselectHousing] = useState(false)
     const [selectJobGuarantee, setselectJobGuarantee] = useState(false)
+    // const dispatch = useDispatch() 
+    const dispatch = useDispatch()
+    const accessBootcampApi = new AccessBootcampAPI(dispatch)
+    //Todo: bootcamp api interceptor not working on useEffect as different dispatch instance has been used
+    useEffect(() => {
+        const fetchBootcamps = async () => {
+            const query = {}
+            const bootcamps = await accessBootcampApi.getAllBootcampByFiltering(query, dispatch)
+            dispatch(SET_BOOTCAMP_DATA({ bootcampData: bootcamps.data }))
+            setBootcampList(bootcamps.data)
+        }
+        fetchBootcamps()
+    }, [])
     const handleSubmit = async (e) => {
         e.preventDefault()
         const query = {
@@ -17,10 +33,12 @@ const ListBootcamp = () => {
             housing: selectHousing,
             jobGuarantee: selectJobGuarantee,
             page: 1,
-            limit: 20,
+            limit: 5,
             zipcode: selectedZipcode
         }
-        await getAllBootcampByFiltering(query)
+        const bootcamps = await accessBootcampApi.getAllBootcampByFiltering(query, dispatch)
+        dispatch(SET_BOOTCAMP_DATA({ bootcampData: bootcamps.data }))
+        setBootcampList(bootcamps.data)
     }
     return (
         <div className='wholepage h-screen'>
@@ -30,7 +48,7 @@ const ListBootcamp = () => {
                         <form onSubmit={handleSubmit}>
                             <div className="form-control">
                                 <label className="cursor-pointer label">
-                                    <span className="label-text">Sort By Name:&nbsp; </span>
+                                    <span className="label-text">Sort By Name:&nbsp  </span>
                                     <input type='checkbox' checked={selectIsNameChecked} onChange={(e) => setSelectIsNameChecked(!selectIsNameChecked)} className="toggle toggle-info" />
                                 </label>
                             </div>
@@ -44,7 +62,7 @@ const ListBootcamp = () => {
                             <div className='justify-center others-search flex flex-row gap-5 flex-wrap content-center'>
                                 <div className="form-control">
                                     <label className="cursor-pointer label">
-                                        <span className="label-text">Housing:&nbsp; </span>
+                                        <span className="label-text">Housing:&nbsp  </span>
                                         <input
                                             type="checkbox"
                                             className="checkbox checkbox-warning"
@@ -55,7 +73,7 @@ const ListBootcamp = () => {
                                 </div>
                                 <div className="form-control">
                                     <label className="cursor-pointer label">
-                                        <span className="label-text">Job Guarantee:&nbsp; </span>
+                                        <span className="label-text">Job Guarantee:&nbsp  </span>
                                         <input
                                             type="checkbox"
                                             className="checkbox checkbox-warning"
